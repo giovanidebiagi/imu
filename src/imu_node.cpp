@@ -20,14 +20,16 @@ int main(int argc, char **argv)
     int fd, n;      /*!< Auxiliary variables used in the reading function */
     std::string aux;                    /*!< Refers to the serial port */ 
     geometry_msgs::Vector3 accel;       /*!< Accelerometer raw data */
-    geometry_msgs::Vector3 mag;         /*!< Magnetometer raw data */
+    geometry_msgs::Vector3 gyro;        /*!< Gyroscope raw data */
     geometry_msgs::Vector3 joy;              /*!< Joystick raw data */
     
-    float acc_x, acc_y, acc_z, mag_x, mag_y, joy_x, joy_y, push_button;     /*!< Data variables */
-    
-    
+    /*!< Data variables */
+    float acc_x, acc_y, acc_z;     
+    float gyro_z;
+    float joy_x, joy_y, push_button;
+
     ros::Publisher pub_accel = node.advertise<geometry_msgs::Vector3>("accel",1);       /*!< Accelerometer data publisher */
-    ros::Publisher pub_mag = node.advertise<geometry_msgs::Vector3>("mag",1);           /*!< Magnetometer data publisher */
+    ros::Publisher pub_gyro = node.advertise<geometry_msgs::Vector3>("gyro",1);         /*!< Gyroscope data publisher */
     ros::Publisher pub_joy = node.advertise<geometry_msgs::Vector3>("joy",1);    /*!< Joystick data publisher */           
     
     ros::Rate loop_rate(50);       /*!< ROS loop rate in Hertz */
@@ -59,8 +61,6 @@ int main(int argc, char **argv)
     /*! ROS routine */
 	while(ros::ok())
 	{    
-        
-        
         /*! If there is an error to open serial port. */
         if(fd < 0)
         {
@@ -71,21 +71,21 @@ int main(int argc, char **argv)
         write(fd, "I\n", 2);        /*!< Keep getting data */ 
 		usleep(500);		
         
-        
         /*! Read data from serial port */
         do
 		{   
             n = read(fd, buf, 64);
         }while (n < 10);
-		
             
         /*! Insert terminating zero in the string */
 		buf[n] = 0;		
-     
         
         /*! Set data to buffer */
-		sscanf(buf, "I|%f|%f|%f|%f|%f|%f|%f|%f|*\r\n", &acc_x, &acc_y, &acc_z, &mag_x, &mag_y, &joy_x, &joy_y, &push_button);
-		
+		//sscanf(buf, "I|%f|%f|%f|%f|%f|%f|%f|%f|*\r\n", &acc_x, &acc_y, &acc_z, &gyro_x, &gyro_z, &joy_x, &joy_y, &push_button);
+
+        /*-----------------------------------------------------*/
+        sscanf(buf, "I|%f|%f|%f|%f|%f|%f|%f|*\r\n", &acc_x, &acc_y, &acc_z, &gyro_z, &joy_x, &joy_y, &push_button);
+		/*-----------------------------------------------------*/
     
         
         /*! Print data */
@@ -94,8 +94,7 @@ int main(int argc, char **argv)
         ROS_INFO_STREAM("accel_x: " << acc_x);
         ROS_INFO_STREAM("accel_y: " << acc_y);
         ROS_INFO_STREAM("accel_z: " << acc_z);
-        ROS_INFO_STREAM("mag_x: " << mag_x);
-        ROS_INFO_STREAM("mag_y: " << mag_y);
+        ROS_INFO_STREAM("gyro_z: " << gyro_z);
         ROS_INFO_STREAM("joy_x: " << joy_x); 
         ROS_INFO_STREAM("joy_y: " << joy_y); 
         ROS_INFO_STREAM("push_button: " << push_button); 
@@ -105,15 +104,14 @@ int main(int argc, char **argv)
         accel.x = acc_x;
         accel.y = acc_y;
         accel.z = acc_z;
-        mag.x = mag_x;
-        mag.y = mag_y;
+        gyro.z = gyro_z;
         joy.x = joy_x;
         joy.y = joy_y;
         joy.z = push_button;
                 
         /*! Publish to topics */
         pub_accel.publish(accel);
-        pub_mag.publish(mag);
+        pub_gyro.publish(gyro);
         pub_joy.publish(joy);   
         
         /*! End of ROS routine */

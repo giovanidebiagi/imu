@@ -119,7 +119,8 @@ include_directories(
 )
 
 ## Declare a C++ library
- add_library(${PROJECT_NAME} src/ADXL345_ros.cpp)
+ add_library(${PROJECT_NAME} src/ADXL345_ros.cpp src/L3G4200D_ros.cpp)
+ 
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
