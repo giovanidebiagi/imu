@@ -28,7 +28,6 @@ double ADXL345::getPitch(double Xg, double Yg, double Zg)
     // Auxiliary variable to calculate the pitch angle
     double YZg = sqrt(Yg*Yg + Zg*Zg);                  
 
-
     //Pitch calculation
     double pitch = atan2(-Xg,YZg)*180/M_PI;
 
