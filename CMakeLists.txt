@@ -192,8 +192,15 @@ include_directories(
 
 add_executable(imu_node src/imu_node.cpp)
 target_link_libraries(imu_node ${catkin_LIBRARIES})
+
 add_executable(conversion_node src/conversion_node.cpp)
 target_link_libraries(conversion_node ${catkin_LIBRARIES} ${PROJECT_NAME})
+
+add_executable(imu_node_glasses src/imu_node_glasses.cpp)
+target_link_libraries(imu_node_glasses ${catkin_LIBRARIES})
+
+add_executable(conversion_node_glasses src/conversion_node_glasses.cpp)
+target_link_libraries(conversion_node_glasses ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 #add_executable(imu src/imu.cpp)
 #target_link_libraries(imu ${catkin_LIBRARIES}
