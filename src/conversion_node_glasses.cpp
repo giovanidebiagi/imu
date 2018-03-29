@@ -50,7 +50,7 @@ int main(int argc, char** argv)
     ros::NodeHandle node;
     
     /*! Data local variables */
-    int count = 0;                  /*!< Counter variable for gyro error reseting */
+    int count = 0;
     int previous_joy_state = 0;     /*!< Auxiliary variable used in gyro/joystick switch routine */
 
     /*! Boolean variable to choose from controlling yaw rate using either gyroscope or joystick.
@@ -112,12 +112,14 @@ int main(int argc, char** argv)
         {
             ROS_INFO_STREAM("Heading control: Joystick. Press the joystick button to switch.");
 
-            if(joy.y > 900)
+            /*! The '< 50' condition refers to the range limit of the servos */
+            if(joy.y > 900 && heading.data < 12)
             {
                 heading.data = heading.data + 1;
             }
 
-            else if(joy.y < 200)
+            /*! The '> -50' condition refers to the range limit of the servos */
+            else if(joy.y < 200 && heading.data > -12)
             {
                 heading.data = heading.data - 1;
             }
@@ -127,6 +129,17 @@ int main(int argc, char** argv)
         /*! Gyro heading routine */
         else if(operation_mode == true)
         {
+	   /*! If gyro mode is activated, the orientation is reseted every 60 seconds to eliminate errors from yaw rate integration */
+            if(count > 3000)
+            {
+                std::cout << "Reseting heading..." << std::endl;
+                usleep(4000000);
+                gyro.resetHeading();    /*!< Sets the return value 'heading' (the same variable returned in gyro.getHeading()) to 0 */
+                count = 0;
+                previous_heading_glasses = 0;   /*! Reset the auxiliary variables */
+                previous_heading_gyro = 0;      /*! Reset the auxiliary variables */
+            }
+
             ROS_INFO_STREAM("Heading control: Gyroscope. Press the joystick button to switch.");
 
             current_heading_gyro = gyro.getHeading(gyro_z);
@@ -146,20 +159,6 @@ int main(int argc, char** argv)
         roll.data = -accel.getRoll(accel_y, -accel_z);  /*!<  Negative because of the hand axis */
         
         pitch.data = -accel.getPitch(accel_x, accel_y, accel_z);
-
-        
-        //heading.data = gyro.getHeading(gyro_z);
-
-        /*
-        /*! If gyro mode is activated, the orientation is reseted every 20 seconds to eliminate errors from yaw rate integration
-        if(count > 3000)
-        {
-            std::cout << "Reseting heading..." << std::endl;
-            usleep(4000000);
-            gyro.resetHeading();
-            count = 0;
-        }
-        */
 
         std::cout << "Roll: " << pitch.data << "          Pitch: " << roll.data << "         Heading: " << heading.data << std::endl;    
        
