@@ -23,6 +23,7 @@ double L3G4200D::getHeading(double gyro_z)
 	{
 		gyro_z = 0;
 	} 
+	
 
     heading = heading + gyro_z*dt;
 
